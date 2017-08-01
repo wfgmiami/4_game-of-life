@@ -36,12 +36,19 @@ var gameOfLife = {
       and pass into func, the cell and the cell's x & y
       coordinates. For example: iteratorFunc(cell, x, y)
     */
-    for( var row = 0; row < this.height; row++ ){
-      for( var col = 0; col < this.width; col++ ){
-        var cell = document.getElementById( col + '-' + row )
-        iteratorFunc(cell, col, row)
+    // for( var row = 0; row < this.height; row++ ){
+    //   for( var col = 0; col < this.width; col++ ){
+    //     var cell = document.getElementById( col + '-' + row )
+    //     iteratorFunc(cell, col, row)
+    //   }
+    // }
+
+    for(var i = 0; i < this.width; i++){
+      for(var j = 0; j < this.height; j++){
+        iteratorFunc.bind(this)(document.getElementById(i + '-' + j));
       }
     }
+
 
   },
 
@@ -78,82 +85,189 @@ var gameOfLife = {
     //   }
     // }
 
-    var onCellClick = function (e) {
-      // QUESTION TO ASK YOURSELF: What is "this" equal to here?
-      // how to set the style of the cell when it's clicked
-      if (this.getAttribute('data-status') == 'dead') {
-        this.className = "alive";
-        this.setAttribute('data-status', 'alive');
-      } else {
-        this.className = "dead";
-        this.setAttribute('data-status', 'dead');
+    this.forEachCell(function(cell){
+      var that = this;
+      cell.addEventListener( 'click', function(){
+        that.toggleStatus(this);
+        that.tick(this);
+      })
+    })
+
+    var that = this;
+
+    document.getElementById('step_btn').addEventListener('click', this.step.bind(this));
+    document.getElementById('clear_btn').addEventListener('click', this.clear.bind(this));
+    document.getElementById('reset_btn').addEventListener('click', this.reset.bind(this));
+
+    document.getElementById('play_btn').addEventListener('click', function(){
+
+      if(that.stepInterval){
+        window.clearInterval(that.stepInterval);
+        that.stepInterval = null;
+        this.innerHTML = 'Play';
+      }else{
+        this.innerHTML = 'Stop';
+        that.stepInterval = window.setInterval(that.step.bind(that), 400)
       }
-    };
+    });
 
-    this.forEachCell(function(cell, col, row){
-      cell.addEventListener( 'click', onCellClick )
-    })
+    // var onCellClick = function (e) {
+    //   // QUESTION TO ASK YOURSELF: What is "this" equal to here?
+    //   // how to set the style of the cell when it's clicked
+    //   if (this.getAttribute('data-status') == 'dead') {
+    //     this.className = "alive";
+    //     this.setAttribute('data-status', 'alive');
+    //   } else {
+    //     this.className = "dead";
+    //     this.setAttribute('data-status', 'dead');
+    //   }
+    // };
 
-    var clear = function(){
-      gameOfLife.forEachCell(function(cell){
-        cell.className = 'dead';
-      })
-    }
+    // this.forEachCell(function(cell, col, row){
+    //   cell.addEventListener( 'click', onCellClick )
+    // })
 
-    var randomize = function(){
-      gameOfLife.forEachCell(function(cell){
-        var flip = Math.random() < 0.5 ? 0 : 1;
-        if (flip) cell.className = 'alive'
-        else cell.className = 'dead';
-      })
-    }
+    // var clear = function(){
+    //   gameOfLife.forEachCell(function(cell){
+    //     cell.className = 'dead';
+    //   })
+    // }
 
-    var clearBtn = document.getElementById('clear_btn');
-    clearBtn.addEventListener('click', clear);
+    // var randomize = function(){
+    //   gameOfLife.forEachCell(function(cell){
+    //     var flip = Math.random() < 0.5 ? 0 : 1;
+    //     if (flip) cell.className = 'alive'
+    //     else cell.className = 'dead';
+    //   })
+    // }
 
-    var randomBtn = document.getElementById('reset_btn');
-    randomBtn.addEventListener('click', randomize);
+    // var clearBtn = document.getElementById('clear_btn');
+    // clearBtn.addEventListener('click', clear);
 
-    var stepBtn = document.getElementById('step_btn');
-    stepBtn.addEventListener('click', gameOfLife.step);
+    // var randomBtn = document.getElementById('reset_btn');
+    // randomBtn.addEventListener('click', randomize);
 
-    var playBtn = document.getElementById('play_btn');
-    playBtn.addEventListener('click', gameOfLife.enableAutoPlay);
+    // var stepBtn = document.getElementById('step_btn');
+    // stepBtn.addEventListener('click', gameOfLife.step);
 
-    var uploadBtn = document.getElementById('upload_btn');
-    uploadBtn.addEventListener('click', gameOfLife.uploadPattern)
+    // var playBtn = document.getElementById('play_btn');
+    // playBtn.addEventListener('click', gameOfLife.enableAutoPlay);
+
+    // var uploadBtn = document.getElementById('upload_btn');
+    // uploadBtn.addEventListener('click', gameOfLife.uploadPattern)
   },
-  uploadPattern: function(){
-    var arr = [];
-    var index = 0;
-    var temp = 0;
 
-    gameOfLife.forEachCell(function(cell, i, j){
-        if (j !== temp ) {
-          index = 0;
-          temp = j;
-        }
+  // uploadPattern: function(){
+  //   var arr = [];
+  //   var index = 0;
+  //   var temp = 0;
 
-        if( j % 3 === 0 ){
-          arr = gameOfLife.pattern[0].split('');
-        }else if( j % 3 === 1 ){
-          arr = gameOfLife.pattern[1].split('');
-        }else{
-          arr = gameOfLife.pattern[2].split('');
-        }
+  //   gameOfLife.forEachCell(function(cell, i, j){
+  //       if (j !== temp ) {
+  //         index = 0;
+  //         temp = j;
+  //       }
 
-        if( index === arr.length ) index = 0;
-        if( arr[index] === '.' ){
-          cell.className = 'dead';
-          cell.setAttribute( 'data-status', 'dead')
-        }else{
-          cell.className = 'alive';
-          cell.setAttribute( 'data-status', 'alive')
-        }
-        index++;
+  //       if( j % 3 === 0 ){
+  //         arr = gameOfLife.pattern[0].split('');
+  //       }else if( j % 3 === 1 ){
+  //         arr = gameOfLife.pattern[1].split('');
+  //       }else{
+  //         arr = gameOfLife.pattern[2].split('');
+  //       }
+
+  //       if( index === arr.length ) index = 0;
+  //       if( arr[index] === '.' ){
+  //         cell.className = 'dead';
+  //         cell.setAttribute( 'data-status', 'dead')
+  //       }else{
+  //         cell.className = 'alive';
+  //         cell.setAttribute( 'data-status', 'alive')
+  //       }
+  //       index++;
+  //   })
+  // },
+  clear: function(){
+    this.forEachCell(function(cell){
+      this.setStatus(cell, 'dead');
+      this.tick(cell);
     })
   },
+
+  reset: function(){
+    this.forEachCell(function(cell){
+      var rnd = Math.random() < 0.5 ? 'dead' : 'alive';
+      this.setStatus(cell, rnd);
+      this.tick(cell);
+    })
+  },
+
+  isAlive: function(cell){
+     return cell.className === 'alive'
+
+  },
+  setStatus: function(cell, value){
+    cell.setAttribute('data-status', value)
+  },
+
+  toggleStatus: function(cell){
+    this.setStatus(cell, this.isAlive(cell) ? 'dead' : 'alive')
+  },
+
+  tick: function(cell){
+    cell.className = cell.getAttribute('data-status');
+  },
+
+  getNeighbors: function(cell){
+    var parts = cell.getAttribute('id').split('-');
+    var x = parts[0] * 1;
+    var y = parts[1] * 1;
+    var neighbors = [];
+
+    for(var i = x - 1; i <= x + 1; i++){
+      for(var j = y - 1; j <= y + 1; j++){
+        var neighbor = document.getElementById(i + '-' + j);
+        if(neighbor && neighbor !== cell){
+          neighbors.push(neighbor);
+        }
+      }
+    }
+    return neighbors;
+  },
+
+  getAliveNeighbors: function(cell){
+    var neighbors = this.getNeighbors(cell);
+    var that = this;
+
+    return neighbors.reduce( function( memo, neighbor) {
+      if( that.isAlive(neighbor) ){
+        memo++;
+      }
+      return memo;
+    }, 0)
+  },
+
   step: function () {
+
+    this.forEachCell(function(cell){
+      var count = this.getAliveNeighbors(cell);
+      var nextStatus;
+
+      if(this.isAlive(cell) && (count < 2 || count > 3)){
+        nextStatus = 'dead';
+      }
+      if(!this.isAlive(cell) && count === 3){
+        nextStatus = 'alive';
+      }
+
+      if(nextStatus){
+        this.setStatus(cell, nextStatus);
+      }
+    })
+    this.forEachCell(function(cell){
+      this.tick(cell)
+    })
+
     // Here is where you want to loop through all the cells
     // on the board and determine, based on it's neighbors,
     // whether the cell should be dead or alive in the next
@@ -162,99 +276,101 @@ var gameOfLife = {
     // You need to:
     // 1. Count alive neighbors for all cells
     // 2. Set the next state of all cells based on their alive neighbors
-    var livesCount = {};
+    // var livesCount = {};
 
-      function checkNeighbors(cell, i, j){
+    //   function checkNeighbors(cell, i, j){
 
-          var colRight = 0;
-          var colLeft = 0;
-          var rowUp = 0;
-          var rowDown = 0;
-          var liveNeighbors = 0;
-          var td = '';
-          var flagCol = false;
-          var flagRow = false;
+    //       var colRight = 0;
+    //       var colLeft = 0;
+    //       var rowUp = 0;
+    //       var rowDown = 0;
+    //       var liveNeighbors = 0;
+    //       var td = '';
+    //       var flagCol = false;
+    //       var flagRow = false;
 
-          //colRight-j; i-rowUp; colRight-rowUp
-          if( i < gameOfLife.width - 1 ) {
-            colRight = i + 1;
-            td = document.getElementById(colRight + '-' + j);
-            if( td.className === 'alive') liveNeighbors++;
-          }
+    //       //colRight-j; i-rowUp; colRight-rowUp
+    //       if( i < gameOfLife.width - 1 ) {
+    //         colRight = i + 1;
+    //         td = document.getElementById(colRight + '-' + j);
+    //         if( td.className === 'alive') liveNeighbors++;
+    //       }
 
-          if( j < gameOfLife.height - 1 ) {
-            rowUp = j + 1;
-            td = document.getElementById(i + '-' + rowUp);
-            if( td.className === 'alive') liveNeighbors++;
-          }
+    //       if( j < gameOfLife.height - 1 ) {
+    //         rowUp = j + 1;
+    //         td = document.getElementById(i + '-' + rowUp);
+    //         if( td.className === 'alive') liveNeighbors++;
+    //       }
 
-          if( colRight && rowUp ){
-            td = document.getElementById(colRight + '-' + rowUp);
-            if( td.className === 'alive') liveNeighbors++;
-          }
+    //       if( colRight && rowUp ){
+    //         td = document.getElementById(colRight + '-' + rowUp);
+    //         if( td.className === 'alive') liveNeighbors++;
+    //       }
 
-          //colLeft-j; i-rowDown; colLeft-rowDown
-          if( i > 0 ) {
-            colLeft = i - 1;
-            if (colLeft === 0) flagCol = true;
-            td = document.getElementById(colLeft + '-' + j);
-            if( td.className === 'alive') liveNeighbors++;
-          }
+    //       //colLeft-j; i-rowDown; colLeft-rowDown
+    //       if( i > 0 ) {
+    //         colLeft = i - 1;
+    //         if (colLeft === 0) flagCol = true;
+    //         td = document.getElementById(colLeft + '-' + j);
+    //         if( td.className === 'alive') liveNeighbors++;
+    //       }
 
-          if( j > 0 ) {
-            rowDown = j - 1;
-            if (rowDown === 0) flagRow = true;
-            td = document.getElementById(i + '-' + rowDown);
-            if( td.className === 'alive') liveNeighbors++;
-          }
+    //       if( j > 0 ) {
+    //         rowDown = j - 1;
+    //         if (rowDown === 0) flagRow = true;
+    //         td = document.getElementById(i + '-' + rowDown);
+    //         if( td.className === 'alive') liveNeighbors++;
+    //       }
 
 
-          if( ( colLeft || flagCol ) && ( rowDown || flagRow ) ){
-            td = document.getElementById(colLeft + '-' + rowDown);
-            if( td.className === 'alive') liveNeighbors++;
-          }
+    //       if( ( colLeft || flagCol ) && ( rowDown || flagRow ) ){
+    //         td = document.getElementById(colLeft + '-' + rowDown);
+    //         if( td.className === 'alive') liveNeighbors++;
+    //       }
 
-          //colRight-rowDown; colLeft-rowUp
-          if( colRight && ( rowDown || flagRow ) ){
-            td = document.getElementById(colRight + '-' + rowDown);
-            if( td.className === 'alive') liveNeighbors++;
-          }
+    //       //colRight-rowDown; colLeft-rowUp
+    //       if( colRight && ( rowDown || flagRow ) ){
+    //         td = document.getElementById(colRight + '-' + rowDown);
+    //         if( td.className === 'alive') liveNeighbors++;
+    //       }
 
-          if( ( colLeft || flagCol ) && rowUp ){
-            td = document.getElementById(colLeft + '-' + rowUp);
-            if( td.className === 'alive') liveNeighbors++;
-          }
-          var key =  cell.id;
-          livesCount[ key ] = liveNeighbors
-      }
+    //       if( ( colLeft || flagCol ) && rowUp ){
+    //         td = document.getElementById(colLeft + '-' + rowUp);
+    //         if( td.className === 'alive') liveNeighbors++;
+    //       }
+    //       var key =  cell.id;
+    //       livesCount[ key ] = liveNeighbors
+    //   }
 
-      gameOfLife.forEachCell(function(cell, i, j){
-        checkNeighbors(cell, i, j);
-      })
+    //   gameOfLife.forEachCell(function(cell, i, j){
+    //     checkNeighbors(cell, i, j);
+    //   })
 
-      gameOfLife.forEachCell(function(cell, i, j){
-        var numLive = livesCount[i + '-' + j]
+    //   gameOfLife.forEachCell(function(cell, i, j){
+    //     var numLive = livesCount[i + '-' + j]
 
-        if ( cell.className === 'alive' && ( numLive > 3 || numLive< 2) ){
-          cell.className = 'dead';
-          cell.setAttribute('data-status', 'dead');
-        }else if ( cell.className === 'dead' && numLive === 3 ) {
-          cell.className = 'alive';
-          cell.setAttribute('data-status', 'alive');
-        }
-      })
+    //     if ( cell.className === 'alive' && ( numLive > 3 || numLive< 2) ){
+    //       cell.className = 'dead';
+    //       cell.setAttribute('data-status', 'dead');
+    //     }else if ( cell.className === 'dead' && numLive === 3 ) {
+    //       cell.className = 'alive';
+    //       cell.setAttribute('data-status', 'alive');
+    //     }
+    //   })
 
   },
 
   enableAutoPlay: function () {
     // Start Auto-Play by running the 'step' function
     // automatically repeatedly every fixed time interval
-    if(!this.stepInterval){
-      this.stepInterval = setInterval(gameOfLife.step, 500)
-    }else{
-      clearInterval(this.stepInterval)
-      this.stepInterval = null;
-    }
+    // if(!this.stepInterval){
+    //   this.stepInterval = setInterval(gameOfLife.step, 500)
+    // }else{
+    //   clearInterval(this.stepInterval)
+    //   this.stepInterval = null;
+    // }
+
+
 
   }
 
